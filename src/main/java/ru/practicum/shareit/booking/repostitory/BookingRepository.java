@@ -16,4 +16,6 @@ public interface BookingRepository {
     List<BookingDto> getBookings();
 
     BookingDto updateBooking(Booking booking, Long userId, Long bookingId);
+
+    BookingDto confirmationBooking(Long userId, Long bookingId);
 }

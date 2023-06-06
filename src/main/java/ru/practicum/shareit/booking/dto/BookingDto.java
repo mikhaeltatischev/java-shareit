@@ -17,4 +17,5 @@ public class BookingDto {
     private LocalDateTime startBookingDate;
     @Future
     private LocalDateTime endBookingDate;
+    private Boolean confirmed;
 }

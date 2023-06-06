@@ -41,4 +41,9 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto updateBooking(Booking booking, Long userId, Long bookingId) {
         return bookingRepository.updateBooking(booking, userId, bookingId);
     }
+
+    @Override
+    public BookingDto confirmationBooking(Long userId, Long bookingId) {
+        return bookingRepository.confirmationBooking(userId, bookingId);
+    }
 }

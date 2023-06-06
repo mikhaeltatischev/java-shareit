@@ -7,8 +7,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -45,5 +43,11 @@ public class BookingController {
                                     @RequestHeader("X-Sharer-User-Id") Long userId,
                                     @PathVariable Long bookingId) {
         return bookingService.updateBooking(booking, userId, bookingId);
+    }
+
+    @PatchMapping("/confirmation/{bookingId}")
+    public BookingDto confirmationBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                          @PathVariable Long bookingId) {
+        return bookingService.confirmationBooking(userId, bookingId);
     }
 }

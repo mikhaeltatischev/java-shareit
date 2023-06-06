@@ -76,9 +76,19 @@ public class BookingRepositoryImpl implements BookingRepository {
         return createBookingDto(currentBooking);
     }
 
+    @Override
+    public BookingDto confirmationBooking(Long userId, Long bookingId) {
+        Booking booking = findBooking(bookingId);
+        checkOwnerId(booking, userId);
+        booking.setConfirmed(true);
+        log.info("Booking with id: " + bookingId + " confirmed from User with id: " + userId);
+
+        return createBookingDto(booking);
+    }
+
     private BookingDto createBookingDto(Booking booking) {
         return new BookingDto(booking.getId(), booking.getAuthor(), booking.getItemId(), booking.getStartBookingDate(),
-                booking.getEndBookingDate());
+                booking.getEndBookingDate(), booking.getConfirmed());
     }
 
     private Booking findBooking(Long bookingId) {

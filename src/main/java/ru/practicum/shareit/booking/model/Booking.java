@@ -21,4 +21,5 @@ public class Booking {
     @NotNull
     @Future
     private LocalDateTime endBookingDate;
+    private Boolean confirmed;
 }
