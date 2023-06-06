@@ -27,19 +27,39 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public Set<Item> getItems() {
-        return items;
+    public Set<Item> getItems(Long userId) {
+        return items.stream()
+                .filter(item -> item.getOwnerId().equals(userId))
+                .collect(Collectors.toSet());
     }
 
     @Override
-    public Item updateItem(Item item, Long userId) {
+    public Item updateItem(Item item, Long userId, Long itemId) {
         try {
-            findItem(item.getId());
-            checkItemOwner(item, userId);
-            items.remove(item);
-            items.add(item);
+            Item currentItem = findItem(itemId);
+            checkItemOwner(currentItem, userId);
 
-            return item;
+            if (item.getId() != null) {
+                currentItem.setId(item.getId());
+            }
+
+            if (item.getOwnerId() != null) {
+                currentItem.setOwnerId(item.getOwnerId());
+            }
+
+            if (item.getName() != null) {
+                currentItem.setName(item.getName());
+            }
+
+            if (item.getDescription() != null) {
+                currentItem.setDescription(item.getDescription());
+            }
+
+            if (item.getAvailable() != null) {
+                currentItem.setAvailable(item.getAvailable());
+            }
+
+            return currentItem;
         } catch (ItemNotFoundException e) {
             log.info(e.getMessage());
             throw new ItemNotFoundException("Item with id: " + item.getId() + " not found");
@@ -62,8 +82,13 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Set<Item> searchItem(String text) {
+        if (text.isBlank()) {
+            return new HashSet<>();
+        }
+
         return items.stream()
-                .filter(item -> item.getName().contains(text) || item.getDescription().contains(text)
+                .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase())
+                        || item.getDescription().toLowerCase().contains(text.toLowerCase())
                         && item.getAvailable().equals(true))
                 .collect(Collectors.toSet());
     }

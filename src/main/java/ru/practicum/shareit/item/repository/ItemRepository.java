@@ -8,9 +8,9 @@ public interface ItemRepository {
 
     Item getItemById(Long id);
 
-    Set<Item> getItems();
+    Set<Item> getItems(Long userId);
 
-    Item updateItem(Item item, Long userId);
+    Item updateItem(Item item, Long userId, Long itemId);
 
     Item addItem(Item item, Long userId);
 
