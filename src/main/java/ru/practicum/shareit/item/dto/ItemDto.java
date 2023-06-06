@@ -11,5 +11,5 @@ public class ItemDto {
     private Long ownerId;
     private String name;
     private String description;
-    private Boolean rentStatus;
+    private Boolean available;
 }

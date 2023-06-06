@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.exception.ItemAlreadyExistsException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.exception.NotOwnerException;
@@ -19,22 +20,26 @@ public class ItemRepositoryImpl implements ItemRepository {
     private Set<Item> items = new HashSet<>();
 
     @Override
-    public Item getItemById(Long id) {
+    public ItemDto getItemById(Long id) {
         Item item = findItem(id);
         log.info("Found item: " + item);
 
-        return item;
+        return createItemDto(item);
     }
 
     @Override
-    public Set<Item> getItems(Long userId) {
-        return items.stream()
+    public Set<ItemDto> getItems(Long userId) {
+        Set<ItemDto> itemsDto = new HashSet<>();
+
+        items.stream()
                 .filter(item -> item.getOwnerId().equals(userId))
-                .collect(Collectors.toSet());
+                .forEach(item -> itemsDto.add(createItemDto(item)));
+
+        return itemsDto;
     }
 
     @Override
-    public Item updateItem(Item item, Long userId, Long itemId) {
+    public ItemDto updateItem(Item item, Long userId, Long itemId) {
         try {
             Item currentItem = findItem(itemId);
             checkItemOwner(currentItem, userId);
@@ -59,7 +64,7 @@ public class ItemRepositoryImpl implements ItemRepository {
                 currentItem.setAvailable(item.getAvailable());
             }
 
-            return currentItem;
+            return createItemDto(currentItem);
         } catch (ItemNotFoundException e) {
             log.info(e.getMessage());
             throw new ItemNotFoundException("Item with id: " + item.getId() + " not found");
@@ -67,7 +72,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public Item addItem(Item item, Long userId) {
+    public ItemDto addItem(Item item, Long userId) {
         try {
             findItem(item.getId());
             log.info("Item with id: " + item.getId() + " already exists");
@@ -76,32 +81,36 @@ public class ItemRepositoryImpl implements ItemRepository {
             item.setId(itemId++);
             item.setOwnerId(userId);
             items.add(item);
-            return item;
+            return createItemDto(item);
         }
     }
 
     @Override
-    public Set<Item> searchItem(String text) {
+    public Set<ItemDto> searchItem(String text) {
         if (text.isBlank()) {
             return new HashSet<>();
         }
 
-        return items.stream()
+        Set<ItemDto> itemsDto = new HashSet<>();
+
+        items.stream()
                 .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase())
                         || item.getDescription().toLowerCase().contains(text.toLowerCase())
                         && item.getAvailable().equals(true))
-                .collect(Collectors.toSet());
+                .forEach(item -> itemsDto.add(createItemDto(item)));
+
+        return itemsDto;
     }
 
     @Override
-    public Item deleteItem(Item item, Long userId) {
+    public ItemDto deleteItem(Item item, Long userId) {
         try {
             findItem(item.getId());
             checkItemOwner(item, userId);
             items.remove(item);
             log.info("Item with id: " + item.getId() + " removed");
 
-            return item;
+            return createItemDto(item);
         } catch (ItemNotFoundException e) {
             log.info(e.getMessage());
             throw new ItemNotFoundException("Item with id: " + item.getId() + " not found");
@@ -119,5 +128,9 @@ public class ItemRepositoryImpl implements ItemRepository {
         if (!item.getOwnerId().equals(userId)) {
             throw new NotOwnerException("User with id: " + userId + " is not the owner of the item with id: " + item.getId());
         }
+    }
+
+    private ItemDto createItemDto(Item item) {
+        return new ItemDto(item.getId(), item.getOwnerId(), item.getName(), item.getDescription(), item.getAvailable());
     }
 }
