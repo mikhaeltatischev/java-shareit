@@ -17,7 +17,7 @@ import java.util.Set;
 public class UserRepositoryImpl implements UserRepository {
 
     private static Long userId = 1L;
-    private Set<User> users = new HashSet<>();
+    private final Set<User> users = new HashSet<>();
 
     @Override
     public UserDto getUserById(Long id) {
@@ -31,7 +31,7 @@ public class UserRepositoryImpl implements UserRepository {
     public Set<UserDto> getUsers() {
         Set<UserDto> usersDto = new HashSet<>();
 
-        users.stream().forEach(user -> usersDto.add(createUserDto(user)));
+        users.forEach(user -> usersDto.add(createUserDto(user)));
 
         return usersDto;
     }
