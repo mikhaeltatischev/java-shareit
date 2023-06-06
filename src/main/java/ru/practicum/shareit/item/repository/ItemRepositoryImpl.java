@@ -10,7 +10,6 @@ import ru.practicum.shareit.item.model.Item;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -63,6 +62,8 @@ public class ItemRepositoryImpl implements ItemRepository {
             if (item.getAvailable() != null) {
                 currentItem.setAvailable(item.getAvailable());
             }
+
+            log.info("Item with id: " + itemId + " updated");
 
             return createItemDto(currentItem);
         } catch (ItemNotFoundException e) {
