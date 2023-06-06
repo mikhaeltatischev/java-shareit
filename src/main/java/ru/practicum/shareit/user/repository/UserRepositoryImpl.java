@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.user.model.Review;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.exception.EmailDuplicateException;
 import ru.practicum.shareit.user.exception.UserAlreadyExistsException;
@@ -82,6 +83,15 @@ public class UserRepositoryImpl implements UserRepository {
             log.info(e.getMessage());
             throw new UserNotFoundException("User with id: " + userId + " not found");
         }
+    }
+
+    @Override
+    public UserDto addReviewToUser(Review review, Long userId, Long sharedUser) {
+        User user = findUser(userId);
+        user.getReviews().add(review);
+        log.info("Review with id: " + review.getId() + "added to User with id: " + userId);
+
+        return createUserDto(user);
     }
 
     private User findUser(Long id) {

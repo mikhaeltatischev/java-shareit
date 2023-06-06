@@ -17,5 +17,5 @@ public class User {
     @Email(message = "Incorrect email")
     @NotBlank
     private String email;
-    private List<String> reviews;
+    private List<Review> reviews;
 }
