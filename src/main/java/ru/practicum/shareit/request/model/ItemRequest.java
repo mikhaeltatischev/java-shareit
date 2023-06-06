@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-@EqualsAndHashCode(of={"id"})
+@EqualsAndHashCode(of = {"id"})
 public class ItemRequest {
 
     private Long id;
