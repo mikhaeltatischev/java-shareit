@@ -2,11 +2,11 @@ package ru.practicum.shareit.user.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.user.model.Review;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.exception.EmailDuplicateException;
 import ru.practicum.shareit.user.exception.UserAlreadyExistsException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
+import ru.practicum.shareit.user.model.Review;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.HashSet;
@@ -30,7 +30,6 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Set<UserDto> getUsers() {
         Set<UserDto> usersDto = new HashSet<>();
-
         users.forEach(user -> usersDto.add(createUserDto(user)));
 
         return usersDto;
@@ -38,51 +37,35 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public UserDto addUser(User user) {
-        try {
-            findUser(user.getId());
-            log.info("User with id: " + user.getId() + " already exists");
-            throw new UserAlreadyExistsException("User with id: " + user.getId() + " already exists");
-        } catch (UserNotFoundException e) {
-            checkDuplicateEmail(user, user.getId());
-            user.setId(userId++);
-            users.add(user);
-            log.info("User with id: " + user.getId() + " saved");
+        checkOnExist(user);
+        checkDuplicateEmail(user, user.getId());
+        user.setId(userId++);
+        users.add(user);
+        log.info("User with id: " + user.getId() + " saved");
 
-            return createUserDto(user);
-        }
+        return createUserDto(user);
     }
 
     @Override
     public UserDto updateUser(User user, Long userId) {
-        try {
-            User currentUser = findUser(userId);
+        User currentUser = findUser(userId);
 
-            if (user.getName() != null) {
-                currentUser.setName(user.getName());
-            }
-
-            if (user.getEmail() != null) {
-                checkDuplicateEmail(user, userId);
-                currentUser.setEmail(user.getEmail());
-            }
-
-            return createUserDto(currentUser);
-        } catch (UserNotFoundException e) {
-            log.info(e.getMessage());
-            throw new UserNotFoundException("User with id: " + user.getId() + " not found");
+        if (user.getName() != null) {
+            currentUser.setName(user.getName());
         }
+
+        if (user.getEmail() != null) {
+            checkDuplicateEmail(user, userId);
+            currentUser.setEmail(user.getEmail());
+        }
+        return createUserDto(currentUser);
     }
 
     @Override
     public void deleteUser(Long userId) {
-        try {
-            User user = findUser(userId);
-            users.remove(user);
-            log.info("User with id: " + userId + " removed");
-        } catch (UserNotFoundException e) {
-            log.info(e.getMessage());
-            throw new UserNotFoundException("User with id: " + userId + " not found");
-        }
+        User user = findUser(userId);
+        users.remove(user);
+        log.info("User with id: " + userId + " removed");
     }
 
     @Override
@@ -113,5 +96,12 @@ public class UserRepositoryImpl implements UserRepository {
                         throw new EmailDuplicateException("User with this email already exists");
                     }
                 });
+    }
+
+    private void checkOnExist(User user) {
+        if (users.stream()
+                .anyMatch(currentUser -> currentUser.getId().equals(user.getId()))) {
+            throw new UserAlreadyExistsException("User with id: " + user.getId() + " already exists");
+        }
     }
 }

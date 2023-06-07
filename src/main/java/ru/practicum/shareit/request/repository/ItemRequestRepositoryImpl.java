@@ -21,46 +21,35 @@ public class ItemRequestRepositoryImpl implements ItemRequestRepository {
 
     @Override
     public ItemRequestDto addItemRequest(ItemRequest itemRequest, Long userId) {
-        try {
-            findItemRequest(itemRequest.getId());
-            throw new ItemRequestAlreadyExistsException("ItemRequest with id: " + itemRequest.getId()
-                    + " already exists");
-        } catch (ItemRequestNotFoundException e) {
-            itemRequest.setId(itemRequestId++);
-            itemRequest.setAuthorId(userId);
-            itemRequest.setTimeOfCreation(LocalDateTime.now());
-            itemRequests.add(itemRequest);
-            log.info("ItemRequest: " + itemRequest + " saved");
+        checkOnExist(itemRequest);
+        itemRequest.setId(itemRequestId++);
+        itemRequest.setAuthorId(userId);
+        itemRequest.setTimeOfCreation(LocalDateTime.now());
+        itemRequests.add(itemRequest);
+        log.info("ItemRequest: " + itemRequest + " saved");
 
-            return createItemRequestDto(itemRequest);
-        }
+        return createItemRequestDto(itemRequest);
     }
 
     @Override
     public ItemRequestDto updateItemRequest(ItemRequest itemRequest, Long userId, Long itemRequestId) {
-        try {
-            ItemRequest currentItemRequest = findItemRequest(itemRequestId);
-            checkOwnerId(currentItemRequest, userId);
+        ItemRequest currentItemRequest = findItemRequest(itemRequestId);
+        checkOwnerId(currentItemRequest, userId);
 
-            if (itemRequest.getId() != null) {
-                currentItemRequest.setId(itemRequest.getId());
-            }
-
-            if (itemRequest.getItemName() != null) {
-                currentItemRequest.setItemName(itemRequest.getItemName());
-            }
-
-            if (itemRequest.getAuthorId() != null) {
-                currentItemRequest.setAuthorId(itemRequest.getAuthorId());
-            }
-
-            log.info("Item request with id: " + itemRequestId + " updated");
-
-            return createItemRequestDto(currentItemRequest);
-        } catch (ItemRequestNotFoundException e) {
-            log.info(e.getMessage());
-            throw new ItemRequestNotFoundException(e.getMessage());
+        if (itemRequest.getId() != null) {
+            currentItemRequest.setId(itemRequest.getId());
         }
+
+        if (itemRequest.getItemName() != null) {
+            currentItemRequest.setItemName(itemRequest.getItemName());
+        }
+
+        if (itemRequest.getAuthorId() != null) {
+            currentItemRequest.setAuthorId(itemRequest.getAuthorId());
+        }
+        log.info("Item request with id: " + itemRequestId + " updated");
+
+        return createItemRequestDto(currentItemRequest);
     }
 
     @Override
@@ -83,17 +72,12 @@ public class ItemRequestRepositoryImpl implements ItemRequestRepository {
 
     @Override
     public ItemRequestDto deleteItemRequest(ItemRequest itemRequest, Long userId) {
-        try {
-            findItemRequest(itemRequest.getId());
-            checkOwnerId(itemRequest, userId);
-            itemRequests.remove(itemRequest);
-            log.info("Item request with id: " + itemRequest.getId() + " deleted");
+        findItemRequest(itemRequest.getId());
+        checkOwnerId(itemRequest, userId);
+        itemRequests.remove(itemRequest);
+        log.info("Item request with id: " + itemRequest.getId() + " deleted");
 
-            return createItemRequestDto(itemRequest);
-        } catch (ItemRequestNotFoundException e) {
-            log.info(e.getMessage());
-            throw new ItemRequestNotFoundException(e.getMessage());
-        }
+        return createItemRequestDto(itemRequest);
     }
 
     private ItemRequest findItemRequest(Long id) {
@@ -113,5 +97,12 @@ public class ItemRequestRepositoryImpl implements ItemRequestRepository {
         if (!itemRequest.getAuthorId().equals(userId)) {
             throw new NotOwnerException("User with id: " + userId + " is not the owner this item request");
         }
+    }
+
+    private void checkOnExist(ItemRequest request) {
+         if (itemRequests.stream()
+                 .anyMatch(itemRequest -> itemRequest.getId().equals(request.getId()))) {
+             throw new ItemRequestAlreadyExistsException("Item request with id: " + request.getId() + " already exists");
+         }
     }
 }

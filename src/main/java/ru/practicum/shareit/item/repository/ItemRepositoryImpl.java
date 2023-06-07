@@ -39,51 +39,41 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public ItemDto updateItem(Item item, Long userId, Long itemId) {
-        try {
-            Item currentItem = findItem(itemId);
-            checkItemOwner(currentItem, userId);
+        Item currentItem = findItem(itemId);
+        checkItemOwner(currentItem, userId);
 
-            if (item.getId() != null) {
-                currentItem.setId(item.getId());
-            }
-
-            if (item.getOwnerId() != null) {
-                currentItem.setOwnerId(item.getOwnerId());
-            }
-
-            if (item.getName() != null) {
-                currentItem.setName(item.getName());
-            }
-
-            if (item.getDescription() != null) {
-                currentItem.setDescription(item.getDescription());
-            }
-
-            if (item.getAvailable() != null) {
-                currentItem.setAvailable(item.getAvailable());
-            }
-
-            log.info("Item with id: " + itemId + " updated");
-
-            return createItemDto(currentItem);
-        } catch (ItemNotFoundException e) {
-            log.info(e.getMessage());
-            throw new ItemNotFoundException("Item with id: " + item.getId() + " not found");
+        if (item.getId() != null) {
+            currentItem.setId(item.getId());
         }
+
+        if (item.getOwnerId() != null) {
+            currentItem.setOwnerId(item.getOwnerId());
+        }
+
+        if (item.getName() != null) {
+            currentItem.setName(item.getName());
+        }
+
+        if (item.getDescription() != null) {
+            currentItem.setDescription(item.getDescription());
+        }
+
+        if (item.getAvailable() != null) {
+            currentItem.setAvailable(item.getAvailable());
+        }
+        log.info("Item with id: " + itemId + " updated");
+
+        return createItemDto(currentItem);
     }
 
     @Override
     public ItemDto addItem(Item item, Long userId) {
-        try {
-            findItem(item.getId());
-            log.info("Item with id: " + item.getId() + " already exists");
-            throw new ItemAlreadyExistsException("Item with id: " + item.getId() + " already exists");
-        } catch (ItemNotFoundException e) {
-            item.setId(itemId++);
-            item.setOwnerId(userId);
-            items.add(item);
-            return createItemDto(item);
-        }
+        checkOnExist(item);
+        item.setId(itemId++);
+        item.setOwnerId(userId);
+        items.add(item);
+
+        return createItemDto(item);
     }
 
     @Override
@@ -105,17 +95,12 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public ItemDto deleteItem(Item item, Long userId) {
-        try {
-            findItem(item.getId());
-            checkItemOwner(item, userId);
-            items.remove(item);
-            log.info("Item with id: " + item.getId() + " removed");
+        findItem(item.getId());
+        checkItemOwner(item, userId);
+        items.remove(item);
+        log.info("Item with id: " + item.getId() + " removed");
 
-            return createItemDto(item);
-        } catch (ItemNotFoundException e) {
-            log.info(e.getMessage());
-            throw new ItemNotFoundException("Item with id: " + item.getId() + " not found");
-        }
+        return createItemDto(item);
     }
 
     private Item findItem(Long id) {
@@ -133,5 +118,12 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     private ItemDto createItemDto(Item item) {
         return new ItemDto(item.getId(), item.getOwnerId(), item.getName(), item.getDescription(), item.getAvailable());
+    }
+
+    private void checkOnExist(Item item) {
+        if (items.stream()
+                .anyMatch(currentItem -> currentItem.getId().equals(item.getId()))) {
+            throw new ItemAlreadyExistsException("Item with id: " + item.getId() + " already exists");
+        }
     }
 }

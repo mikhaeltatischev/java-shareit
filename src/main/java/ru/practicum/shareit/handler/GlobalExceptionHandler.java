@@ -35,4 +35,10 @@ public class GlobalExceptionHandler {
     public AppError handleNotOwnerException(final NotOwnerException e) {
         return new AppError(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
+    public AppError handleRuntimeException(final RuntimeException e) {
+        return new AppError(e.getMessage());
+    }
 }
