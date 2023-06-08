@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public AppError handleRuntimeException(final RuntimeException e) {
         return new AppError(e.getMessage());
     }
