@@ -5,7 +5,7 @@ import ru.practicum.shareit.user.model.User;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserDtoMapper{
+public class UserDtoMapper {
 
     public static UserDto toDto(User user) {
         Long userId = user.getUserId();

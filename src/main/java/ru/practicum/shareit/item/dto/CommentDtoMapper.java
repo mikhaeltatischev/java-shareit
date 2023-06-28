@@ -19,7 +19,7 @@ public class CommentDtoMapper {
         String text = comment.getText();
         LocalDateTime timeOfCreation = comment.getTimeOfCreation();
         Item item = comment.getItem();
-        Long itemId= comment.getItem().getItemId();
+        Long itemId = comment.getItem().getItemId();
 
         return new CommentDto(commentId, UserDtoMapper.toDto(author), author.getName(), authorId, rating, text, timeOfCreation, ItemDtoMapper.toDto(item), itemId);
     }
