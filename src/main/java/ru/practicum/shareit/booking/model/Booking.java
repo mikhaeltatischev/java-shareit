@@ -1,7 +1,9 @@
 package ru.practicum.shareit.booking.model;
 
-import lombok.*;
-import org.springframework.boot.context.properties.bind.DefaultValue;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -9,8 +11,6 @@ import javax.persistence.*;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-
-import static ru.practicum.shareit.booking.model.Status.WAITING;
 
 @Data
 @Table(name = "bookings")
