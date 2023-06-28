@@ -1,47 +1,87 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.user.model.Review;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.Set;
+import java.util.List;
+
+import static ru.practicum.shareit.user.dto.UserDtoMapper.toDto;
+import static ru.practicum.shareit.user.dto.UserDtoMapper.toUser;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
     @Override
     public UserDto getUserById(Long id) {
-        return userRepository.getUserById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        log.info("Found User: " + user);
+
+        return toDto(user);
     }
 
     @Override
-    public Set<UserDto> getUsers() {
-        return userRepository.getUsers();
+    public List<UserDto> getUsers() {
+        List<User> users = userRepository.findAll();
+
+        log.info("Found users: " + users);
+
+        return toDto(users);
     }
 
     @Override
-    public UserDto addUser(User user) {
-        return userRepository.addUser(user);
+    @Transactional
+    public UserDto addUser(UserDto user) {
+        User savedUser = userRepository.save(toUser(user));
+
+        log.info("User with id: " + savedUser.getUserId() + " saved");
+
+        return toDto(savedUser);
     }
 
     @Override
-    public UserDto updateUser(User user, Long userId) {
-        return userRepository.updateUser(user, userId);
+    @Transactional
+    public UserDto updateUser(UserDto userDto, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        update(user, userDto);
+        userRepository.save(user);
+        log.info("User with id: " + userId + " updated");
+
+        return toDto(user);
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
-        userRepository.deleteUser(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        userRepository.deleteById(userId);
+        log.info("User with id: " + userId + " deleted");
     }
 
-    @Override
-    public UserDto addReviewToUser(Review review, Long userId, Long sharedUser) {
-        return userRepository.addReviewToUser(review, userId, sharedUser);
+    private User update(User user, UserDto userDto) {
+        if (userDto.getEmail() != null) {
+            user.setEmail(userDto.getEmail());
+        }
+
+        if (userDto.getName() != null) {
+            user.setName(userDto.getName());
+        }
+
+        return user;
     }
 }

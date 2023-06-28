@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class AppError {
-    private String message;
+    private String error;
 }

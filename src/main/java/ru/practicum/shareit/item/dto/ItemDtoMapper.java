@@ -1,20 +1,51 @@
 package ru.practicum.shareit.item.dto;
 
-import org.springframework.jdbc.core.RowMapper;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.dto.UserDtoMapper;
+import ru.practicum.shareit.user.model.User;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ItemDtoMapper implements RowMapper<ItemDto> {
+public class ItemDtoMapper {
 
-    @Override
-    public ItemDto mapRow(ResultSet rs, int rowNum) throws SQLException {
-        Long id = rs.getLong("id");
-        Long owner = rs.getLong("owner_id");
-        String name = rs.getString("name");
-        String description = rs.getString("description");
-        Boolean available = rs.getBoolean("available");
+    public static ItemDto toDto(Item item) {
+        Long itemId = item.getItemId();
+        String name = item.getName();
+        User owner = item.getUser();
+        String description = item.getDescription();
+        Boolean available = item.getAvailable();
 
-        return new ItemDto(id, owner, name, description, available);
+        return new ItemDto(itemId, name, UserDtoMapper.toDto(owner), description, available);
+    }
+
+    public static Item toItem(ItemDto item, User owner) {
+        Long itemId = item.getId();
+        String name = item.getName();
+        String description = item.getDescription();
+        Boolean available = item.getAvailable();
+
+        return new Item(itemId, name, owner, description, available);
+    }
+
+    public static ItemBookingDto toDto(Item item, BookingDto lastBooking, BookingDto nextBooking, List<CommentDto> comments) {
+        Long itemId = item.getItemId();
+        String name = item.getName();
+        User owner = item.getUser();
+        String description = item.getDescription();
+        Boolean available = item.getAvailable();
+
+        return new ItemBookingDto(itemId, name, UserDtoMapper.toDto(owner), description, available, lastBooking, nextBooking, comments);
+    }
+
+    public static List<ItemDto> toDto(List<Item> items) {
+        List<ItemDto> itemDtos = new ArrayList<>();
+
+        for (Item item : items) {
+            itemDtos.add(toDto(item));
+        }
+
+        return itemDtos;
     }
 }
