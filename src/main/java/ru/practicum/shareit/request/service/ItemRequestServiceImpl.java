@@ -62,11 +62,21 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDto getItemRequestById(Long id) {
-        return toDto(itemRequestRepository.findById(id).get());
+        ItemRequest itemRequest = itemRequestRepository.findById(id)
+                .orElseThrow(() -> new ItemRequestNotFoundException(id));
+
+        log.info("Item request with id: " + id + ": " + itemRequest);
+
+        return toDto(itemRequest);
     }
 
     @Override
     public ItemRequestDto deleteItemRequest(Long id, Long userId) {
-        return toDto(itemRequestRepository.findById(id).get());
+        ItemRequest itemRequest = itemRequestRepository.findById(id)
+                .orElseThrow(() -> new ItemRequestNotFoundException(id));
+
+        log.info("Item request with id: " + id + " deleted");
+
+        return toDto(itemRequest);
     }
 }

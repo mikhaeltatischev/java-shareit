@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BookingNotFoundException extends RuntimeException {
 
-    public BookingNotFoundException(Long id) {
-        super(getMessage(id));
-        log.info(getMessage(id));
-    }
+    private static final String MESSAGE = "Booking with id: %d not found";
 
-    private static String getMessage(Long id) {
-        return "Booking with id: " + id + " not found";
+    public BookingNotFoundException(Long id) {
+        super(String.format(MESSAGE, id));
+        log.info(String.format(MESSAGE, id));
     }
 }

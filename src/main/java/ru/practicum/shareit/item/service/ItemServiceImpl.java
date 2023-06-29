@@ -50,7 +50,7 @@ public class ItemServiceImpl implements ItemService {
 
         if (item.getUser().getUserId().equals(userId) && !bookings.isEmpty()) {
             Booking lastBooking = bookings.stream()
-                    .filter((booking) -> booking.getStartTime().isBefore(LocalDateTime.now()) && !booking.getStatus().equals(Status.REJECTED))
+                    .filter(booking -> booking.getStartTime().isBefore(LocalDateTime.now()) && !booking.getStatus().equals(Status.REJECTED))
                     .min(Booking::compareTo)
                     .orElse(null);
 

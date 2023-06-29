@@ -7,12 +7,10 @@ import java.time.LocalDateTime;
 @Slf4j
 public class BookingTimeException extends RuntimeException {
 
-    public BookingTimeException(LocalDateTime start, LocalDateTime end) {
-        super(getMessage(start, end));
-        log.info(getMessage(start, end));
-    }
+    private static final String MESSAGE = "Start time: %s must be before End time: %s";
 
-    private static String getMessage(LocalDateTime start, LocalDateTime end) {
-        return "Start time: " + start + " must be before End time: " + end;
+    public BookingTimeException(LocalDateTime start, LocalDateTime end) {
+        super(String.format(MESSAGE, start.toString(), end.toString()));
+        log.info(String.format(MESSAGE, start, end));
     }
 }

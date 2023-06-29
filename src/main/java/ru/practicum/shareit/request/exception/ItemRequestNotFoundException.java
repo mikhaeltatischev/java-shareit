@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ItemRequestNotFoundException extends RuntimeException {
 
-    public ItemRequestNotFoundException(Long id) {
-        super(getMessage(id));
-        log.info(getMessage(id));
-    }
+    private final static String MESSAGE = "Item request with id: %d not found";
 
-    private static String getMessage(Long id) {
-        return "Item request with id: " + id + " not found";
+    public ItemRequestNotFoundException(Long id) {
+        super(String.format(MESSAGE, id));
+        log.info(String.format(MESSAGE, id));
     }
 }

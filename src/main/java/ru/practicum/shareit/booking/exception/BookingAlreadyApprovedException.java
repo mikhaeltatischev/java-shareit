@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BookingAlreadyApprovedException extends RuntimeException {
 
-    public BookingAlreadyApprovedException(Long id) {
-        super(getMessage(id));
-        log.info(getMessage(id));
-    }
+    private static final String MESSAGE = "Booking with id: %d already approved";
 
-    private static String getMessage(Long id) {
-        return "Booking with id: " + id + " already approved";
+    public BookingAlreadyApprovedException(Long id) {
+        super(String.format(MESSAGE, id));
+        log.info(String.format(MESSAGE, id));
     }
 }

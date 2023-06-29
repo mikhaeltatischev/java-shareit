@@ -40,10 +40,6 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new ItemNotFoundException(bookingDto.getItemId()));
 
-        if (item.getUser().getUserId().equals(userId)) {
-            throw new BookingCreateException(userId, item.getItemId());
-        }
-
         if (item.getAvailable().equals(false)) {
             throw new ItemNotAvailableException(item.getItemId());
         }
