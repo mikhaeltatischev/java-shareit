@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserNotFoundException extends RuntimeException {
 
-    private final static String MESSAGE = "User with id: %d not found";
+    private static final String MESSAGE = "User with id: %d not found";
 
     public UserNotFoundException(Long id) {
         super(String.format(MESSAGE, id));
