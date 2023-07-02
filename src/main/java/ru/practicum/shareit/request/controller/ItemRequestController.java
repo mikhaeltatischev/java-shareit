@@ -3,11 +3,10 @@ package ru.practicum.shareit.request.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/requests")
@@ -17,31 +16,31 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @PostMapping
-    public ItemRequestDto addItemRequest(@Valid @RequestBody ItemRequest itemRequest,
+    public ItemRequestDto addItemRequest(@Valid @RequestBody ItemRequestDto itemRequest,
                                          @RequestHeader("X-Sharer-User-Id") Long userId) {
         return itemRequestService.addItemRequest(itemRequest, userId);
     }
 
-    @PatchMapping("/{itemRequestId}")
-    public ItemRequestDto updateItemRequest(@RequestBody ItemRequest itemRequest,
+    @PatchMapping("/{id}")
+    public ItemRequestDto updateItemRequest(@RequestBody ItemRequestDto itemRequest,
                                             @RequestHeader("X-Sharer-User-Id") Long userId,
-                                            @PathVariable Long itemRequestId) {
-        return itemRequestService.updateItemRequest(itemRequest, userId, itemRequestId);
+                                            @PathVariable Long id) {
+        return itemRequestService.updateItemRequest(itemRequest, userId, id);
     }
 
     @GetMapping
-    public Set<ItemRequestDto> getItemRequests() {
+    public List<ItemRequestDto> getItemRequests() {
         return itemRequestService.getItemRequests();
     }
 
-    @GetMapping("/{itemRequestId}")
+    @GetMapping("/{id}")
     public ItemRequestDto getItemRequest(@PathVariable Long id) {
         return itemRequestService.getItemRequestById(id);
     }
 
-    @DeleteMapping
-    public ItemRequestDto deleteItemRequest(@RequestBody ItemRequest itemRequest,
+    @DeleteMapping("/id")
+    public ItemRequestDto deleteItemRequest(@PathVariable("id") Long id,
                                             @RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemRequestService.deleteItemRequest(itemRequest, userId);
+        return itemRequestService.deleteItemRequest(id, userId);
     }
 }
