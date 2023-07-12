@@ -2,16 +2,19 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.GetBooking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repostitory.BookingRepository;
+import ru.practicum.shareit.common.FieldIsNotValidException;
 import ru.practicum.shareit.item.exception.ItemNotAvailableException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
-import ru.practicum.shareit.item.exception.NotOwnerException;
+import ru.practicum.shareit.common.NotOwnerException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
@@ -95,9 +98,6 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
-        if (booking.getStatus().equals(Status.APPROVED)) {
-            throw new BookingAlreadyApprovedException(bookingId);
-        }
 
         if (!booking.getItem().getUser().getUserId().equals(userId)) {
             throw new NotOwnerException("User with id: " + userId + " is not the owner Item with id: "
@@ -105,6 +105,9 @@ public class BookingServiceImpl implements BookingService {
         }
 
         if (approved.equals("true")) {
+            if (booking.getStatus().equals(Status.APPROVED)) {
+                throw new BookingAlreadyApprovedException(bookingId);
+            }
             booking.setStatus(Status.APPROVED);
         } else {
             booking.setStatus(Status.REJECTED);
@@ -117,7 +120,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingForCurrentUser(Long userId, String state) {
+    public List<BookingDto> getBookingForCurrentUser(GetBooking getBooking) {
+        Long userId = getBooking.getUserId();
+        String state = getBooking.getState().toUpperCase();
+        checkValidGetBooking(getBooking);
+        PageRequest pageRequest = PageRequest.of(getBooking.getFrom() / getBooking.getSize(), getBooking.getSize());
         LocalDateTime time = LocalDateTime.now();
         List<Booking> bookings;
         userRepository.findById(userId)
@@ -125,22 +132,22 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case "ALL":
-                bookings = bookingRepository.findAllByUserUserIdOrderByEndTimeDesc(userId);
+                bookings = bookingRepository.findAllByUserUserIdOrderByEndTimeDesc(userId, pageRequest);
                 break;
             case "CURRENT":
-                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByEndTimeDesc(userId, time, time);
+                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByEndTimeDesc(userId, time, time, pageRequest);
                 break;
             case "PAST":
-                bookings = bookingRepository.findAllByUserUserIdAndEndTimeIsBeforeOrderByEndTimeDesc(userId, time);
+                bookings = bookingRepository.findAllByUserUserIdAndEndTimeIsBeforeOrderByEndTimeDesc(userId, time, pageRequest);
                 break;
             case "FUTURE":
-                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsAfterOrderByEndTimeDesc(userId, time);
+                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsAfterOrderByEndTimeDesc(userId, time, pageRequest);
                 break;
             case "WAITING":
-                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsAfterAndStatusOrderByEndTimeDesc(userId, time, Status.valueOf(state));
+                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsAfterAndStatusOrderByEndTimeDesc(userId, time, Status.valueOf(state), pageRequest);
                 break;
             case "REJECTED":
-                bookings = bookingRepository.findAllByUserUserIdAndStatusOrderByEndTimeDesc(userId, Status.valueOf(state));
+                bookings = bookingRepository.findAllByUserUserIdAndStatusOrderByEndTimeDesc(userId, Status.valueOf(state), pageRequest);
                 break;
             default:
                 throw new NotValidStateException("Unknown state: " + state);
@@ -149,7 +156,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingForOwner(Long userId, String state) {
+    public List<BookingDto> getBookingForOwner(GetBooking getBooking) {
+        Long userId = getBooking.getUserId();
+        String state = getBooking.getState().toUpperCase();
+        checkValidGetBooking(getBooking);
+        PageRequest pageRequest = PageRequest.of(getBooking.getFrom() / getBooking.getSize(), getBooking.getSize());
         LocalDateTime time = LocalDateTime.now();
         List<Booking> bookings;
         userRepository.findById(userId)
@@ -157,26 +168,35 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case "ALL":
-                bookings = bookingRepository.findAllBookingByOwnerId(userId);
+                bookings = bookingRepository.findAllBookingByOwnerId(userId, pageRequest);
                 break;
             case "CURRENT":
-                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByEndTimeDesc(userId, time, time);
+                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByEndTimeDesc(userId, time, time, pageRequest);
                 break;
             case "PAST":
-                bookings = bookingRepository.findAllByItemUserUserIdAndEndTimeIsBeforeOrderByEndTimeDesc(userId, time);
+                bookings = bookingRepository.findAllByItemUserUserIdAndEndTimeIsBeforeOrderByEndTimeDesc(userId, time, pageRequest);
                 break;
             case "FUTURE":
-                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsAfterOrderByEndTimeDesc(userId, time);
+                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsAfterOrderByEndTimeDesc(userId, time, pageRequest);
                 break;
             case "WAITING":
-                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsAfterAndStatusOrderByEndTimeDesc(userId, time, Status.valueOf(state));
+                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsAfterAndStatusOrderByEndTimeDesc(userId, time, Status.valueOf(state), pageRequest);
                 break;
             case "REJECTED":
-                bookings = bookingRepository.findAllByItemUserUserIdAndStatusOrderByEndTimeDesc(userId, Status.valueOf(state));
+                bookings = bookingRepository.findAllByItemUserUserIdAndStatusOrderByEndTimeDesc(userId, Status.valueOf(state), pageRequest);
                 break;
             default:
                 throw new NotValidStateException("Unknown state: " + state);
         }
         return toDto(bookings);
+    }
+
+    private void checkValidGetBooking(GetBooking getBooking) {
+        if (getBooking.getFrom() < 0) {
+            throw new FieldIsNotValidException("From");
+        }
+        if (getBooking.getSize() < 0) {
+            throw new FieldIsNotValidException("Size");
+        }
     }
 }
