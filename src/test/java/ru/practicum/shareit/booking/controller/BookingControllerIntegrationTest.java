@@ -398,7 +398,7 @@ public class BookingControllerIntegrationTest {
                         .queryParam("state", "Unknown"))
                 .andExpect(status().isBadRequest());
     }
-    //
+
     @Test
     @SneakyThrows
     public void getBookingForOwnerWhenStateIsAllReturnFourBookings() {

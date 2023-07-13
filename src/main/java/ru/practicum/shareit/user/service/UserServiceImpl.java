@@ -10,7 +10,6 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import javax.validation.constraints.Email;
 import java.util.List;
 
 import static ru.practicum.shareit.user.dto.UserDtoMapper.toDto;
