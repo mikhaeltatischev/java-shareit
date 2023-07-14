@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repostitory.BookingRepository;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +26,9 @@ public class BookingRepositoryIntegrationTest {
 
     @Autowired
     private BookingRepository bookingRepository;
+
+    @Autowired
+    private ItemRepository itemRepository;
 
     private long userId;
     private long ownerId;
@@ -183,5 +188,14 @@ public class BookingRepositoryIntegrationTest {
         List<Booking> bookings = bookingRepository.findAllByItemItemId(2L);
 
         assertEquals(0, bookings.size());
+    }
+
+    @Test
+    public void findAllByItemsWhenInvokedMethodReturnFourBookings() {
+        List<Item> items = itemRepository.findAll();
+
+        List<Booking> bookings = bookingRepository.findAllByItems(items);
+
+        assertEquals(4, bookings.size());
     }
 }

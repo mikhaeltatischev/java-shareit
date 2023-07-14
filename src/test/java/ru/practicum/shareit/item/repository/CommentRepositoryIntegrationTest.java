@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
 
@@ -18,6 +19,9 @@ public class CommentRepositoryIntegrationTest {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private ItemRepository itemRepository;
 
     private long itemId;
 
@@ -40,5 +44,14 @@ public class CommentRepositoryIntegrationTest {
         List<Comment> comments = commentRepository.findAllCommentByItemItemId(itemIdWithoutComments);
 
         assertEquals(0, comments.size());
+    }
+
+    @Test
+    public void findAllByItemsWhenReturn() {
+        List<Item> items = itemRepository.findAll();
+
+        List<Comment> comments = commentRepository.findAllByItems(items);
+
+        assertEquals(1, comments.size());
     }
 }

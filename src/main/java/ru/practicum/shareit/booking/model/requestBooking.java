@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class GetBooking {
+public class requestBooking {
 
     private Long userId;
     private String state;

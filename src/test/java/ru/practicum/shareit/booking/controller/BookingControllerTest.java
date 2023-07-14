@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.exception.BookingNotFoundException;
-import ru.practicum.shareit.booking.model.GetBooking;
+import ru.practicum.shareit.booking.model.requestBooking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
@@ -38,7 +38,7 @@ public class BookingControllerTest {
     private BookingService bookingService;
 
     private BookingDto bookingDto;
-    private GetBooking getBooking;
+    private requestBooking requestBooking;
     private long userId;
     private long bookingId;
 
@@ -56,7 +56,7 @@ public class BookingControllerTest {
                 .end(LocalDateTime.now().plusHours(2))
                 .build();
 
-        getBooking = GetBooking.builder()
+        requestBooking = requestBooking.builder()
                 .userId(1L)
                 .state("true")
                 .size(10)
@@ -137,7 +137,7 @@ public class BookingControllerTest {
     @Test
     @SneakyThrows
     public void setApproveWhenInvokedMethodReturnBooking() {
-        when(bookingService.setApprove(userId, bookingId, "true")).thenReturn(bookingDto);
+        when(bookingService.setApprove(userId, bookingId, true)).thenReturn(bookingDto);
 
         mvc.perform(patch(URL + "/{bookingId}", bookingId)
                         .queryParam("approved", "true")
@@ -148,7 +148,7 @@ public class BookingControllerTest {
     @Test
     @SneakyThrows
     public void setApproveWhenBookingNotFoundReturnStatusIsNotFound() {
-        when(bookingService.setApprove(userId, bookingId, "true")).thenThrow(BookingNotFoundException.class);
+        when(bookingService.setApprove(userId, bookingId, true)).thenThrow(BookingNotFoundException.class);
 
         mvc.perform(patch(URL + "/{bookingId}", bookingId)
                         .queryParam("approved", "true")
@@ -159,7 +159,7 @@ public class BookingControllerTest {
     @Test
     @SneakyThrows
     public void getBookingForCurrentUserWhenInvokedMethodReturnOneBooking() {
-        when(bookingService.getBookingForCurrentUser(getBooking)).thenReturn(List.of(bookingDto));
+        when(bookingService.getBookingForCurrentUser(requestBooking)).thenReturn(List.of(bookingDto));
 
         mvc.perform(get(URL)
                         .queryParam("state", "ALL")
@@ -172,7 +172,7 @@ public class BookingControllerTest {
     @Test
     @SneakyThrows
     public void getBookingForOwnerWhenInvokedMethodReturnOneBooking() {
-        when(bookingService.getBookingForOwner(getBooking)).thenReturn(List.of(bookingDto));
+        when(bookingService.getBookingForOwner(requestBooking)).thenReturn(List.of(bookingDto));
 
         mvc.perform(get(URL)
                         .queryParam("state", "ALL")

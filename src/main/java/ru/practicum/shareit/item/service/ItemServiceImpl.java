@@ -28,6 +28,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.item.dto.ItemDtoMapper.*;
 
@@ -49,7 +50,7 @@ public class ItemServiceImpl implements ItemService {
         List<CommentDto> comments = CommentDtoMapper.toDto(commentRepository.findAllCommentByItemItemId(id));
         ItemBookingDto itemDto = fromItem(item);
 
-        if (item.getUser().getUserId().equals(userId) && !bookings.isEmpty()) {
+        if (userId.equals(item.getUser().getUserId()) && !bookings.isEmpty()) {
             findLastAndNextBooking(itemDto, bookings);
         }
         itemDto.setComments(comments);
@@ -65,19 +66,27 @@ public class ItemServiceImpl implements ItemService {
         PageRequest pageRequest = PageRequest.of(item.getFrom() / item.getSize(), item.getSize());
 
         List<Item> items = itemRepository.findAllByUserUserId(userId, pageRequest);
+        List<Booking> bookings = bookingRepository.findAllByItems(items);
+        List<CommentDto> comments = CommentDtoMapper.toDto(commentRepository.findAllByItems(items));
         List<ItemBookingDto> itemDtos = new ArrayList<>();
 
         for (Item currentItem : items) {
-            long itemId = currentItem.getItemId();
+            Long itemId = currentItem.getItemId();
             ItemBookingDto itemDto = fromItem(currentItem);
-            List<Booking> bookings = bookingRepository.findAllByItemItemId(itemId);
-            List<CommentDto> comments = CommentDtoMapper.toDto(commentRepository.findAllCommentByItemItemId(itemId));
 
-            if (currentItem.getUser().getUserId().equals(userId) && !bookings.isEmpty()) {
-                findLastAndNextBooking(itemDto, bookings);
+            List<Booking> bookingsForItem = bookings.stream()
+                    .filter(booking -> itemId.equals(booking.getItem().getItemId()))
+                    .collect(Collectors.toList());
+
+            List<CommentDto> commentsForItem = comments.stream()
+                    .filter(commentDto -> itemId.equals(commentDto.getItemId()))
+                    .collect(Collectors.toList());
+
+            if (userId.equals(currentItem.getUser().getUserId()) && !bookings.isEmpty()) {
+                findLastAndNextBooking(itemDto, bookingsForItem);
             }
-            itemDto.setComments(comments);
 
+            itemDto.setComments(commentsForItem);
             itemDtos.add(itemDto);
         }
 
@@ -155,14 +164,14 @@ public class ItemServiceImpl implements ItemService {
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        if (item.getUser().getUserId().equals(userId)) {
+        if (userId.equals(item.getUser().getUserId())) {
             throw new CommentCreateException("The Owner of the item can not add comment");
         }
 
         List<Booking> bookings = bookingRepository.findAllByUserUserIdAndEndTimeIsBeforeOrderByEndTimeDesc(userId, LocalDateTime.now());
 
         bookings.stream()
-                .filter((booking) -> booking.getUser().getUserId().equals(userId))
+                .filter((booking) -> userId.equals(booking.getUser().getUserId()))
                 .findFirst()
                 .orElseThrow(() -> new CommentCreateException("User with id: " + userId + " did not rent the item with id: " + itemId));
 

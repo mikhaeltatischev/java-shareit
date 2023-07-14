@@ -3,7 +3,7 @@ package ru.practicum.shareit.booking.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.model.GetBooking;
+import ru.practicum.shareit.booking.model.requestBooking;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
@@ -37,7 +37,7 @@ public class BookingController {
     @PatchMapping("/{bookingId}")
     public BookingDto setApprove(@RequestHeader("X-Sharer-User-Id") Long userId,
                                  @PathVariable Long bookingId,
-                                 @RequestParam String approved) {
+                                 @RequestParam Boolean approved) {
         return bookingService.setApprove(userId, bookingId, approved);
     }
 
@@ -46,7 +46,7 @@ public class BookingController {
                                                      @RequestParam(required = false, defaultValue = "ALL") String state,
                                                      @RequestParam(defaultValue = "0") int from,
                                                      @RequestParam(defaultValue = "10") int size) {
-        return bookingService.getBookingForCurrentUser(new GetBooking(userId, state, from, size));
+        return bookingService.getBookingForCurrentUser(new requestBooking(userId, state, from, size));
     }
 
     @GetMapping("/owner")
@@ -54,6 +54,6 @@ public class BookingController {
                                                @RequestParam(required = false, defaultValue = "ALL") String state,
                                                @RequestParam(defaultValue = "0") int from,
                                                @RequestParam(defaultValue = "10") int size) {
-        return bookingService.getBookingForOwner(new GetBooking(userId, state, from, size));
+        return bookingService.getBookingForOwner(new requestBooking(userId, state, from, size));
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.GetBooking;
+import ru.practicum.shareit.booking.model.requestBooking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repostitory.BookingRepository;
 import ru.practicum.shareit.common.FieldIsNotValidException;
@@ -38,18 +38,17 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto addBooking(BookingDto bookingDto, Long userId) {
+        Boolean status = false;
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new ItemNotFoundException(bookingDto.getItemId()));
 
-        if (item.getUser() != null) {
-            if (item.getUser().getUserId().equals(userId)) {
-                throw new BookingCreateException(userId, item.getItemId());
-            }
+        if (item.getUser() != null && userId.equals(item.getUser().getUserId())) {
+            throw new BookingCreateException(userId, item.getItemId());
         }
 
-        if (item.getAvailable().equals(false)) {
+        if (status.equals(item.getAvailable())) {
             throw new ItemNotAvailableException(item.getItemId());
         }
 
@@ -69,7 +68,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
-        if (!booking.getUser().getUserId().equals(userId)) {
+        if (!userId.equals(booking.getUser().getUserId())) {
             throw new NotOwnerException("User with id: " + userId + " is not the owner Booking with id: " + bookingId);
         }
 
@@ -84,7 +83,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
-        if (!(booking.getItem().getUser().getUserId().equals(userId) || booking.getUser().getUserId().equals(userId))) {
+        if (!(userId.equals(booking.getItem().getUser().getUserId()) || userId.equals(booking.getUser().getUserId()))) {
             throw new NotOwnerException("User with id: " + userId + " don't have access to Booking with id: " + bookingId);
         }
 
@@ -94,37 +93,36 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDto setApprove(Long userId, Long bookingId, String approved) {
+    public BookingDto setApprove(Long userId, Long bookingId, Boolean approved) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
 
-        if (!booking.getItem().getUser().getUserId().equals(userId)) {
+        if (!userId.equals(booking.getItem().getUser().getUserId())) {
             throw new NotOwnerException("User with id: " + userId + " is not the owner Item with id: "
                     + booking.getItem().getItemId());
         }
 
-        if (approved.equals("true")) {
-            if (booking.getStatus().equals(Status.APPROVED)) {
-                throw new BookingAlreadyApprovedException(bookingId);
-            }
-            booking.setStatus(Status.APPROVED);
-        } else {
+        if (approved.equals(true) && Status.APPROVED.equals(booking.getStatus())) {
+            throw new BookingAlreadyApprovedException(bookingId);
+        } else if (approved.equals(false)) {
             booking.setStatus(Status.REJECTED);
+        } else {
+            booking.setStatus(Status.APPROVED);
         }
 
         bookingRepository.save(booking);
-        log.info("Changed status to " + approved + ", booking with id: " + bookingId);
+        log.info("Changed status to " + booking.getStatus() + ", booking with id: " + bookingId);
 
         return toDto(booking);
     }
 
     @Override
-    public List<BookingDto> getBookingForCurrentUser(GetBooking getBooking) {
-        Long userId = getBooking.getUserId();
-        String state = getBooking.getState().toUpperCase();
-        checkValidGetBooking(getBooking);
-        PageRequest pageRequest = PageRequest.of(getBooking.getFrom() / getBooking.getSize(), getBooking.getSize());
+    public List<BookingDto> getBookingForCurrentUser(requestBooking requestBooking) {
+        Long userId = requestBooking.getUserId();
+        String state = requestBooking.getState().toUpperCase();
+        checkValidGetBooking(requestBooking);
+        PageRequest pageRequest = PageRequest.of(requestBooking.getFrom() / requestBooking.getSize(), requestBooking.getSize());
         LocalDateTime time = LocalDateTime.now();
         List<Booking> bookings;
         userRepository.findById(userId)
@@ -156,11 +154,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingForOwner(GetBooking getBooking) {
-        Long userId = getBooking.getUserId();
-        String state = getBooking.getState().toUpperCase();
-        checkValidGetBooking(getBooking);
-        PageRequest pageRequest = PageRequest.of(getBooking.getFrom() / getBooking.getSize(), getBooking.getSize());
+    public List<BookingDto> getBookingForOwner(requestBooking requestBooking) {
+        Long userId = requestBooking.getUserId();
+        String state = requestBooking.getState().toUpperCase();
+        checkValidGetBooking(requestBooking);
+        PageRequest pageRequest = PageRequest.of(requestBooking.getFrom() / requestBooking.getSize(), requestBooking.getSize());
         LocalDateTime time = LocalDateTime.now();
         List<Booking> bookings;
         userRepository.findById(userId)
@@ -191,11 +189,11 @@ public class BookingServiceImpl implements BookingService {
         return toDto(bookings);
     }
 
-    private void checkValidGetBooking(GetBooking getBooking) {
-        if (getBooking.getFrom() < 0) {
+    private void checkValidGetBooking(requestBooking requestBooking) {
+        if (requestBooking.getFrom() < 0) {
             throw new FieldIsNotValidException("From");
         }
-        if (getBooking.getSize() < 0) {
+        if (requestBooking.getSize() < 0) {
             throw new FieldIsNotValidException("Size");
         }
     }

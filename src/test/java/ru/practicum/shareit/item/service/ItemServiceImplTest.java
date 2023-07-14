@@ -221,8 +221,8 @@ public class ItemServiceImplTest {
         List<Item> items = List.of(toItem(itemBooking, toUser(userDto)));
         List<ItemBookingDto> itemsDto = List.of(itemBooking);
 
-        when(bookingRepository.findAllByItemItemId(itemId)).thenReturn(bookings);
-        when(commentRepository.findAllCommentByItemItemId(itemId)).thenReturn(comments);
+        when(bookingRepository.findAllByItems(items)).thenReturn(bookings);
+        when(commentRepository.findAllByItems(items)).thenReturn(comments);
         when(itemRepository.findAllByUserUserId(userId, pageRequest)).thenReturn(items);
 
         List<ItemBookingDto> foundItems = service.getItemsForUser(getItem);

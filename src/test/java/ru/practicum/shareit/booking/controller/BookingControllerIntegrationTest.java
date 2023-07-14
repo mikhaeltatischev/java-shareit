@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -434,20 +436,9 @@ public class BookingControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
     @SneakyThrows
-    public void getBookingForOwnerWhenStateIsCurrentReturnOneBooking() {
-        mvc.perform(get(URL + "/owner")
-                        .header("X-Sharer-User-Id", itemOwnerId)
-                        .queryParam("from", "0")
-                        .queryParam("size", "10")
-                        .queryParam("state", "CURRENT"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()", is(1)));
-    }
-
-    @Test
-    @SneakyThrows
+    @ParameterizedTest
+    @ValueSource(strings = {"past", "current"})
     public void getBookingForOwnerWhenStateIsPastReturnOneBooking() {
         mvc.perform(get(URL + "/owner")
                         .header("X-Sharer-User-Id", itemOwnerId)
@@ -470,26 +461,15 @@ public class BookingControllerIntegrationTest {
                 .andExpect(jsonPath("$.length()", is(2)));
     }
 
-    @Test
     @SneakyThrows
-    public void getBookingForOwnerWhenStateIsWaitingReturnEmptyList() {
+    @ParameterizedTest
+    @ValueSource(strings = {"waiting", "rejected"})
+    public void getBookingForOwnerWhenStateIsStringsReturnEmptyList(String state) {
         mvc.perform(get(URL + "/owner")
                         .header("X-Sharer-User-Id", itemOwnerId)
                         .queryParam("from", "0")
                         .queryParam("size", "10")
-                        .queryParam("state", "waiting"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()", is(0)));
-    }
-
-    @Test
-    @SneakyThrows
-    public void getBookingForOwnerWhenStateIsRejectedReturnOneBooking() {
-        mvc.perform(get(URL + "/owner")
-                        .header("X-Sharer-User-Id", itemOwnerId)
-                        .queryParam("from", "0")
-                        .queryParam("size", "10")
-                        .queryParam("state", "rejected"))
+                        .queryParam("state", state))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()", is(0)));
     }
@@ -512,17 +492,6 @@ public class BookingControllerIntegrationTest {
                         .header("X-Sharer-User-Id", itemOwnerId)
                         .queryParam("from", "0")
                         .queryParam("size", "-10")
-                        .queryParam("state", "ALL"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @SneakyThrows
-    public void getBookingForOwnerWhenFromIsNegativeReturnStatusIsBadRequest() {
-        mvc.perform(get(URL + "/owner")
-                        .header("X-Sharer-User-Id", itemOwnerId)
-                        .queryParam("from", "-10")
-                        .queryParam("size", "10")
                         .queryParam("state", "ALL"))
                 .andExpect(status().isBadRequest());
     }

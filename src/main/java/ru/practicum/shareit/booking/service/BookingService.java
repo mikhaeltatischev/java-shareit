@@ -1,7 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.model.GetBooking;
+import ru.practicum.shareit.booking.model.requestBooking;
 
 import java.util.List;
 
@@ -13,9 +13,9 @@ public interface BookingService {
 
     BookingDto getBookingById(Long userId, Long bookingId);
 
-    BookingDto setApprove(Long userId, Long bookingId, String approved);
+    BookingDto setApprove(Long userId, Long bookingId, Boolean approved);
 
-    List<BookingDto> getBookingForCurrentUser(GetBooking getBooking);
+    List<BookingDto> getBookingForCurrentUser(requestBooking requestBooking);
 
-    List<BookingDto> getBookingForOwner(GetBooking getBooking);
+    List<BookingDto> getBookingForOwner(requestBooking requestBooking);
 }
