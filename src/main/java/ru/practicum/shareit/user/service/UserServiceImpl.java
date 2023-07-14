@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.common.FieldIsNotValidException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -65,21 +66,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(Long userId) {
+    public UserDto deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         userRepository.deleteById(userId);
         log.info("User with id: " + userId + " deleted");
+
+        return toDto(user);
     }
 
     private User update(User user, UserDto userDto) {
         if (userDto.getEmail() != null) {
-            user.setEmail(userDto.getEmail());
+            if (userDto.getEmail().isBlank() || !userDto.getEmail().matches(".+[@].+[\\.].+")) {
+                throw new FieldIsNotValidException("Email");
+            } else {
+                user.setEmail(userDto.getEmail());
+            }
         }
 
         if (userDto.getName() != null) {
-            user.setName(userDto.getName());
+            if (userDto.getName().isBlank()) {
+                throw new FieldIsNotValidException("Name");
+            } else {
+                user.setName(userDto.getName());
+            }
         }
 
         return user;

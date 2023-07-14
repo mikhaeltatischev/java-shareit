@@ -1,9 +1,6 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
@@ -14,6 +11,7 @@ import javax.persistence.*;
 @EqualsAndHashCode(of = {"itemId"})
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Item {
 
     @Id
@@ -32,4 +30,7 @@ public class Item {
 
     @Column
     private Boolean available;
+
+    @Column
+    private Long requestId;
 }

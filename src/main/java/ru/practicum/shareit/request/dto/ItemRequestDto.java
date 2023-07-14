@@ -1,18 +1,34 @@
 package ru.practicum.shareit.request.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
-public class ItemRequestDto {
+@Builder
+public class ItemRequestDto implements Comparable<ItemRequestDto> {
 
     private Long id;
-    private String itemName;
+    @NotBlank
+    private String description;
     private Long authorId;
-    private LocalDateTime timeOfCreation;
+    private LocalDateTime created;
+    private List<ItemResponseDto> items;
+
+    public ItemRequestDto(Long id, String description, Long authorId, LocalDateTime created) {
+        this.id = id;
+        this.description = description;
+        this.authorId = authorId;
+        this.created = created;
+    }
+
+    @Override
+    public int compareTo(ItemRequestDto request) {
+        return request.getCreated().compareTo(this.created);
+    }
 }

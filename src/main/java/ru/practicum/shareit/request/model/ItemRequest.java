@@ -1,9 +1,6 @@
 package ru.practicum.shareit.request.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
@@ -14,19 +11,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "item_requests")
-@EqualsAndHashCode(of = {"id"})
+@EqualsAndHashCode(of = {"itemRequestId"})
+@Builder
 public class ItemRequest {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long itemRequestId;
 
     @Column
-    private String itemName;
+    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User author;
+    private User user;
 
     @Column
     private LocalDateTime timeOfCreation;
