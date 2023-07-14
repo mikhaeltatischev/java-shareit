@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.exception.BookingNotFoundException;
-import ru.practicum.shareit.booking.model.requestBooking;
+import ru.practicum.shareit.booking.model.RequestBooking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
@@ -38,7 +38,7 @@ public class BookingControllerTest {
     private BookingService bookingService;
 
     private BookingDto bookingDto;
-    private requestBooking requestBooking;
+    private RequestBooking requestBooking;
     private long userId;
     private long bookingId;
 

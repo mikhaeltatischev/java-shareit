@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.requestBooking;
+import ru.practicum.shareit.booking.model.RequestBooking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repostitory.BookingRepository;
 import ru.practicum.shareit.common.NotOwnerException;
@@ -52,7 +52,7 @@ public class BookingServiceTest {
     private User owner;
     private Item item;
     private Booking booking;
-    private requestBooking requestBooking;
+    private RequestBooking requestBooking;
     private LocalDateTime now;
 
     @BeforeEach

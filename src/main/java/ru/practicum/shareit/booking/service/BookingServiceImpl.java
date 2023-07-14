@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.requestBooking;
+import ru.practicum.shareit.booking.model.RequestBooking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repostitory.BookingRepository;
 import ru.practicum.shareit.common.FieldIsNotValidException;
@@ -118,7 +118,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingForCurrentUser(requestBooking requestBooking) {
+    public List<BookingDto> getBookingForCurrentUser(RequestBooking requestBooking) {
         Long userId = requestBooking.getUserId();
         String state = requestBooking.getState().toUpperCase();
         checkValidGetBooking(requestBooking);
@@ -154,7 +154,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingForOwner(requestBooking requestBooking) {
+    public List<BookingDto> getBookingForOwner(RequestBooking requestBooking) {
         Long userId = requestBooking.getUserId();
         String state = requestBooking.getState().toUpperCase();
         checkValidGetBooking(requestBooking);
@@ -189,7 +189,7 @@ public class BookingServiceImpl implements BookingService {
         return toDto(bookings);
     }
 
-    private void checkValidGetBooking(requestBooking requestBooking) {
+    private void checkValidGetBooking(RequestBooking requestBooking) {
         if (requestBooking.getFrom() < 0) {
             throw new FieldIsNotValidException("From");
         }
