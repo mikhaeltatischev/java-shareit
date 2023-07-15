@@ -11,8 +11,8 @@ public class ItemRequestDtoMapper {
 
     public static ItemRequestDto toDto(ItemRequest itemRequest) {
         Long id = itemRequest.getItemRequestId();
-        String name = itemRequest.getItemName();
-        Long authorId = itemRequest.getAuthor().getUserId();
+        String name = itemRequest.getDescription();
+        Long authorId = itemRequest.getUser().getUserId();
         LocalDateTime timeOfCreation = itemRequest.getTimeOfCreation();
 
         return new ItemRequestDto(id, name, authorId, timeOfCreation);
@@ -20,8 +20,8 @@ public class ItemRequestDtoMapper {
 
     public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto, User author) {
         Long id = itemRequestDto.getId();
-        String name = itemRequestDto.getItemName();
-        LocalDateTime timeOfCreation = itemRequestDto.getTimeOfCreation();
+        String name = itemRequestDto.getDescription();
+        LocalDateTime timeOfCreation = itemRequestDto.getCreated();
 
         return new ItemRequest(id, name, author, timeOfCreation);
     }

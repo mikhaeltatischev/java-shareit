@@ -2,16 +2,19 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.RequestBooking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repostitory.BookingRepository;
+import ru.practicum.shareit.common.FieldIsNotValidException;
 import ru.practicum.shareit.item.exception.ItemNotAvailableException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
-import ru.practicum.shareit.item.exception.NotOwnerException;
+import ru.practicum.shareit.common.NotOwnerException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
@@ -40,13 +43,11 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new ItemNotFoundException(bookingDto.getItemId()));
 
-        if (item.getUser() != null) {
-            if (item.getUser().getUserId().equals(userId)) {
-                throw new BookingCreateException(userId, item.getItemId());
-            }
+        if (item.getUser() != null && userId.equals(item.getUser().getUserId())) {
+            throw new BookingCreateException(userId, item.getItemId());
         }
 
-        if (item.getAvailable().equals(false)) {
+        if (!item.getAvailable()) {
             throw new ItemNotAvailableException(item.getItemId());
         }
 
@@ -66,7 +67,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
-        if (!booking.getUser().getUserId().equals(userId)) {
+        if (!userId.equals(booking.getUser().getUserId())) {
             throw new NotOwnerException("User with id: " + userId + " is not the owner Booking with id: " + bookingId);
         }
 
@@ -81,7 +82,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
-        if (!(booking.getItem().getUser().getUserId().equals(userId) || booking.getUser().getUserId().equals(userId))) {
+        if (!(userId.equals(booking.getItem().getUser().getUserId()) || userId.equals(booking.getUser().getUserId()))) {
             throw new NotOwnerException("User with id: " + userId + " don't have access to Booking with id: " + bookingId);
         }
 
@@ -91,33 +92,36 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDto setApprove(Long userId, Long bookingId, String approved) {
+    public BookingDto setApprove(Long userId, Long bookingId, Boolean approved) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));
 
-        if (booking.getStatus().equals(Status.APPROVED)) {
-            throw new BookingAlreadyApprovedException(bookingId);
-        }
 
-        if (!booking.getItem().getUser().getUserId().equals(userId)) {
+        if (!userId.equals(booking.getItem().getUser().getUserId())) {
             throw new NotOwnerException("User with id: " + userId + " is not the owner Item with id: "
                     + booking.getItem().getItemId());
         }
 
-        if (approved.equals("true")) {
-            booking.setStatus(Status.APPROVED);
-        } else {
+        if (approved && Status.APPROVED.equals(booking.getStatus())) {
+            throw new BookingAlreadyApprovedException(bookingId);
+        } else if (!approved) {
             booking.setStatus(Status.REJECTED);
+        } else {
+            booking.setStatus(Status.APPROVED);
         }
 
         bookingRepository.save(booking);
-        log.info("Changed status to " + approved + ", booking with id: " + bookingId);
+        log.info("Changed status to " + booking.getStatus() + ", booking with id: " + bookingId);
 
         return toDto(booking);
     }
 
     @Override
-    public List<BookingDto> getBookingForCurrentUser(Long userId, String state) {
+    public List<BookingDto> getBookingForCurrentUser(RequestBooking requestBooking) {
+        Long userId = requestBooking.getUserId();
+        String state = requestBooking.getState().toUpperCase();
+        checkValidGetBooking(requestBooking);
+        PageRequest pageRequest = PageRequest.of(requestBooking.getFrom() / requestBooking.getSize(), requestBooking.getSize());
         LocalDateTime time = LocalDateTime.now();
         List<Booking> bookings;
         userRepository.findById(userId)
@@ -125,22 +129,22 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case "ALL":
-                bookings = bookingRepository.findAllByUserUserIdOrderByEndTimeDesc(userId);
+                bookings = bookingRepository.findAllByUserUserIdOrderByEndTimeDesc(userId, pageRequest);
                 break;
             case "CURRENT":
-                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByEndTimeDesc(userId, time, time);
+                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByEndTimeDesc(userId, time, time, pageRequest);
                 break;
             case "PAST":
-                bookings = bookingRepository.findAllByUserUserIdAndEndTimeIsBeforeOrderByEndTimeDesc(userId, time);
+                bookings = bookingRepository.findAllByUserUserIdAndEndTimeIsBeforeOrderByEndTimeDesc(userId, time, pageRequest);
                 break;
             case "FUTURE":
-                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsAfterOrderByEndTimeDesc(userId, time);
+                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsAfterOrderByEndTimeDesc(userId, time, pageRequest);
                 break;
             case "WAITING":
-                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsAfterAndStatusOrderByEndTimeDesc(userId, time, Status.valueOf(state));
+                bookings = bookingRepository.findAllByUserUserIdAndStartTimeIsAfterAndStatusOrderByEndTimeDesc(userId, time, Status.valueOf(state), pageRequest);
                 break;
             case "REJECTED":
-                bookings = bookingRepository.findAllByUserUserIdAndStatusOrderByEndTimeDesc(userId, Status.valueOf(state));
+                bookings = bookingRepository.findAllByUserUserIdAndStatusOrderByEndTimeDesc(userId, Status.valueOf(state), pageRequest);
                 break;
             default:
                 throw new NotValidStateException("Unknown state: " + state);
@@ -149,7 +153,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getBookingForOwner(Long userId, String state) {
+    public List<BookingDto> getBookingForOwner(RequestBooking requestBooking) {
+        Long userId = requestBooking.getUserId();
+        String state = requestBooking.getState().toUpperCase();
+        checkValidGetBooking(requestBooking);
+        PageRequest pageRequest = PageRequest.of(requestBooking.getFrom() / requestBooking.getSize(), requestBooking.getSize());
         LocalDateTime time = LocalDateTime.now();
         List<Booking> bookings;
         userRepository.findById(userId)
@@ -157,26 +165,35 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case "ALL":
-                bookings = bookingRepository.findAllBookingByOwnerId(userId);
+                bookings = bookingRepository.findAllBookingByOwnerId(userId, pageRequest);
                 break;
             case "CURRENT":
-                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByEndTimeDesc(userId, time, time);
+                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsBeforeAndEndTimeIsAfterOrderByEndTimeDesc(userId, time, time, pageRequest);
                 break;
             case "PAST":
-                bookings = bookingRepository.findAllByItemUserUserIdAndEndTimeIsBeforeOrderByEndTimeDesc(userId, time);
+                bookings = bookingRepository.findAllByItemUserUserIdAndEndTimeIsBeforeOrderByEndTimeDesc(userId, time, pageRequest);
                 break;
             case "FUTURE":
-                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsAfterOrderByEndTimeDesc(userId, time);
+                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsAfterOrderByEndTimeDesc(userId, time, pageRequest);
                 break;
             case "WAITING":
-                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsAfterAndStatusOrderByEndTimeDesc(userId, time, Status.valueOf(state));
+                bookings = bookingRepository.findAllByItemUserUserIdAndStartTimeIsAfterAndStatusOrderByEndTimeDesc(userId, time, Status.valueOf(state), pageRequest);
                 break;
             case "REJECTED":
-                bookings = bookingRepository.findAllByItemUserUserIdAndStatusOrderByEndTimeDesc(userId, Status.valueOf(state));
+                bookings = bookingRepository.findAllByItemUserUserIdAndStatusOrderByEndTimeDesc(userId, Status.valueOf(state), pageRequest);
                 break;
             default:
                 throw new NotValidStateException("Unknown state: " + state);
         }
         return toDto(bookings);
+    }
+
+    private void checkValidGetBooking(RequestBooking requestBooking) {
+        if (requestBooking.getFrom() < 0) {
+            throw new FieldIsNotValidException("From");
+        }
+        if (requestBooking.getSize() < 0) {
+            throw new FieldIsNotValidException("Size");
+        }
     }
 }

@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
-import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 
@@ -16,8 +16,9 @@ public class ItemDtoMapper {
         User owner = item.getUser();
         String description = item.getDescription();
         Boolean available = item.getAvailable();
+        Long requestId = item.getRequestId();
 
-        return new ItemDto(itemId, name, UserDtoMapper.toDto(owner), description, available);
+        return new ItemDto(itemId, name, UserDtoMapper.toDto(owner), description, available, requestId);
     }
 
     public static Item toItem(ItemDto item, User owner) {
@@ -25,18 +26,19 @@ public class ItemDtoMapper {
         String name = item.getName();
         String description = item.getDescription();
         Boolean available = item.getAvailable();
+        Long requestId = item.getRequestId();
 
-        return new Item(itemId, name, owner, description, available);
+        return new Item(itemId, name, owner, description, available, requestId);
     }
 
-    public static ItemBookingDto toDto(Item item, BookingDto lastBooking, BookingDto nextBooking, List<CommentDto> comments) {
-        Long itemId = item.getItemId();
-        String name = item.getName();
-        User owner = item.getUser();
-        String description = item.getDescription();
-        Boolean available = item.getAvailable();
+    public static Item toItem(ItemBookingDto itemDto, User user) {
+        Long id = itemDto.getId();
+        String name = itemDto.getName();
+        String description = itemDto.getDescription();
+        Boolean available = itemDto.getAvailable();
+        Long requestId = itemDto.getRequestId();
 
-        return new ItemBookingDto(itemId, name, UserDtoMapper.toDto(owner), description, available, lastBooking, nextBooking, comments);
+        return new Item(id, name, user, description, available, requestId);
     }
 
     public static List<ItemDto> toDto(List<Item> items) {
@@ -47,5 +49,16 @@ public class ItemDtoMapper {
         }
 
         return itemDtos;
+    }
+
+    public static ItemBookingDto fromItem(Item item) {
+        Long itemId = item.getItemId();
+        String name = item.getName();
+        UserDto user = UserDtoMapper.toDto(item.getUser());
+        String description = item.getDescription();
+        Boolean available = item.getAvailable();
+        Long itemRequestId = item.getRequestId();
+
+        return new ItemBookingDto(itemId, name, user, description, available, itemRequestId);
     }
 }
