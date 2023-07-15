@@ -11,7 +11,7 @@ import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.exception.CommentCreateException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
-import ru.practicum.shareit.item.model.GetItem;
+import ru.practicum.shareit.item.model.RequestItem;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -63,9 +63,9 @@ public class ItemControllerTest {
     @Test
     public void getItemsForUserWhenFoundOneItemReturnListWithOneItem() {
         List<ItemBookingDto> items = List.of(itemBookingDto);
-        GetItem getItem = GetItem.of(userId, 0, 10);
+        RequestItem requestItem = RequestItem.of(userId, 0, 10);
 
-        when(itemService.getItemsForUser(getItem)).thenReturn(items);
+        when(itemService.getItemsForUser(requestItem)).thenReturn(items);
 
         List<ItemBookingDto> foundItems = controller.getItemsForUser(userId, 0, 10);
 
@@ -76,9 +76,9 @@ public class ItemControllerTest {
     @Test
     public void getItemsForUserWhenItemNotFoundReturnEmptyList() {
         List<ItemBookingDto> items = List.of();
-        GetItem getItem = GetItem.of(userId, 0, 10);
+        RequestItem requestItem = RequestItem.of(userId, 0, 10);
 
-        when(itemService.getItemsForUser(getItem)).thenReturn(items);
+        when(itemService.getItemsForUser(requestItem)).thenReturn(items);
 
         List<ItemBookingDto> foundItems = controller.getItemsForUser(userId, 0, 10);
 
@@ -139,9 +139,9 @@ public class ItemControllerTest {
     @Test
     public void searchWhenInvokedMethodReturnOneItem() {
         List<ItemDto> items = List.of(itemDto);
-        GetItem getItem = GetItem.of(userId, 0, 10, "text");
+        RequestItem requestItem = RequestItem.of(userId, 0, 10, "text");
 
-        when(itemService.searchItem(getItem)).thenReturn(items);
+        when(itemService.searchItem(requestItem)).thenReturn(items);
 
         List<ItemDto> foundItems = controller.search("text", userId, 0, 10);
 
@@ -152,9 +152,9 @@ public class ItemControllerTest {
     @Test
     public void searchWhenItemsNotFoundReturnEmptyList() {
         List<ItemDto> items = List.of();
-        GetItem getItem = GetItem.of(userId, 0, 10, "text");
+        RequestItem requestItem = RequestItem.of(userId, 0, 10, "text");
 
-        when(itemService.searchItem(getItem)).thenReturn(items);
+        when(itemService.searchItem(requestItem)).thenReturn(items);
 
         List<ItemDto> foundItems = controller.search("text", userId, 0, 10);
 

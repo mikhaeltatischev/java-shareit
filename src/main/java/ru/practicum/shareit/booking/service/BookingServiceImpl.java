@@ -38,7 +38,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto addBooking(BookingDto bookingDto, Long userId) {
-        Boolean status = false;
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Item item = itemRepository.findById(bookingDto.getItemId())
@@ -48,7 +47,7 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingCreateException(userId, item.getItemId());
         }
 
-        if (status.equals(item.getAvailable())) {
+        if (item.getAvailable()) {
             throw new ItemNotAvailableException(item.getItemId());
         }
 
@@ -103,7 +102,7 @@ public class BookingServiceImpl implements BookingService {
                     + booking.getItem().getItemId());
         }
 
-        if (approved.equals(true) && Status.APPROVED.equals(booking.getStatus())) {
+        if (approved && Status.APPROVED.equals(booking.getStatus())) {
             throw new BookingAlreadyApprovedException(bookingId);
         } else if (approved.equals(false)) {
             booking.setStatus(Status.REJECTED);

@@ -17,7 +17,7 @@ import ru.practicum.shareit.item.exception.CommentCreateException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.common.NotOwnerException;
 import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.model.GetItem;
+import ru.practicum.shareit.item.model.RequestItem;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -61,7 +61,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemBookingDto> getItemsForUser(GetItem item) {
+    public List<ItemBookingDto> getItemsForUser(RequestItem item) {
         Long userId = item.getUserId();
         PageRequest pageRequest = PageRequest.of(item.getFrom() / item.getSize(), item.getSize());
 
@@ -139,7 +139,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItem(GetItem item) {
+    public List<ItemDto> searchItem(RequestItem item) {
         String text = item.getText();
         PageRequest pageRequest = PageRequest.of(item.getFrom() / item.getSize(), item.getSize());
 
@@ -219,12 +219,12 @@ public class ItemServiceImpl implements ItemService {
 
     private void findLastAndNextBooking(ItemBookingDto item, List<Booking> bookings) {
         Booking lastBooking = bookings.stream()
-                .filter(booking -> booking.getStartTime().isBefore(LocalDateTime.now()) && !booking.getStatus().equals(Status.REJECTED))
+                .filter(booking -> booking.getStartTime().isBefore(LocalDateTime.now()) && !Status.REJECTED.equals(booking.getStatus()))
                 .min(Booking::compareTo)
                 .orElse(null);
 
         Booking nextBooking = bookings.stream()
-                .filter((booking) -> booking.getStartTime().isAfter(LocalDateTime.now()) && !booking.getStatus().equals(Status.REJECTED))
+                .filter((booking) -> booking.getStartTime().isAfter(LocalDateTime.now()) && !Status.REJECTED.equals(booking.getStatus()))
                 .max(Booking::compareTo)
                 .orElse(null);
 

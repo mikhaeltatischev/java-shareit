@@ -5,15 +5,15 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class GetItem {
+public class RequestItem {
 
     private Long userId;
     private int from;
     private int size;
     private String text;
 
-    public static GetItem of(Long userId, int from, int size) {
-        GetItem item = new GetItem();
+    public static RequestItem of(Long userId, int from, int size) {
+        RequestItem item = new RequestItem();
         item.setUserId(userId);
         item.setFrom(from);
         item.setSize(size);
@@ -21,8 +21,8 @@ public class GetItem {
         return item;
     }
 
-    public static GetItem of(Long userId, int from, int size, String text) {
-        GetItem item = new GetItem();
+    public static RequestItem of(Long userId, int from, int size, String text) {
+        RequestItem item = new RequestItem();
         item.setUserId(userId);
         item.setFrom(from);
         item.setSize(size);

@@ -18,7 +18,7 @@ import ru.practicum.shareit.item.exception.CommentCreateException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.common.NotOwnerException;
 import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.model.GetItem;
+import ru.practicum.shareit.item.model.RequestItem;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -203,8 +203,8 @@ public class ItemServiceImplTest {
     public void getItemsForUserWhenFoundOneItemReturnItem() {
         Item item = toItem(itemBooking, toUser(userDto));
         User currentUser = toUser(userDto);
-        GetItem getItem = GetItem.of(1L, 0, 10, "text");
-        PageRequest pageRequest = PageRequest.of(getItem.getFrom(), getItem.getSize());
+        RequestItem requestItem = RequestItem.of(1L, 0, 10, "text");
+        PageRequest pageRequest = PageRequest.of(requestItem.getFrom(), requestItem.getSize());
         Booking lastBooking = new Booking(1L, currentUser, item, LocalDateTime.now().minusDays(2),
                 LocalDateTime.now().minusDays(1), Status.APPROVED);
         Booking nextBooking = new Booking(2L, currentUser, item, LocalDateTime.now().plusDays(1),
@@ -225,7 +225,7 @@ public class ItemServiceImplTest {
         when(commentRepository.findAllByItems(items)).thenReturn(comments);
         when(itemRepository.findAllByUserUserId(userId, pageRequest)).thenReturn(items);
 
-        List<ItemBookingDto> foundItems = service.getItemsForUser(getItem);
+        List<ItemBookingDto> foundItems = service.getItemsForUser(requestItem);
 
         assertEquals(itemsDto, foundItems);
         assertEquals(1, foundItems.size());
@@ -234,9 +234,9 @@ public class ItemServiceImplTest {
     @Test
     public void getItemsForUserWhenItemNotFoundReturnEmptyList() {
         List<ItemBookingDto> items = List.of();
-        GetItem getItem = GetItem.of(1L, 0, 10, "text");
+        RequestItem requestItem = RequestItem.of(1L, 0, 10, "text");
 
-        List<ItemBookingDto> foundItems = service.getItemsForUser(getItem);
+        List<ItemBookingDto> foundItems = service.getItemsForUser(requestItem);
 
         assertEquals(items, foundItems);
         assertEquals(0, foundItems.size());
@@ -432,26 +432,26 @@ public class ItemServiceImplTest {
 
     @Test
     public void searchItemWhenInvokedMethodReturnOneItem() {
-        GetItem getItem = GetItem.of(1L, 0, 10, "text");
-        PageRequest pageRequest = PageRequest.of(getItem.getFrom(), getItem.getSize());
+        RequestItem requestItem = RequestItem.of(1L, 0, 10, "text");
+        PageRequest pageRequest = PageRequest.of(requestItem.getFrom(), requestItem.getSize());
         List<ItemDto> items = List.of(itemDto);
 
         when(itemRepository.findAllByAvailableAndDescriptionContainingIgnoreCaseOrNameContainingIgnoreCase(true,
-                getItem.getText(), getItem.getText(), pageRequest)).thenReturn(List.of(toItem(itemDto, toUser(userDto))));
+                requestItem.getText(), requestItem.getText(), pageRequest)).thenReturn(List.of(toItem(itemDto, toUser(userDto))));
 
-        assertEquals(items, service.searchItem(getItem));
+        assertEquals(items, service.searchItem(requestItem));
     }
 
     @Test
     public void searchItemWhenNotFoundItemsReturnEmptyList() {
-        GetItem getItem = GetItem.of(1L, 0, 10, "text");
-        PageRequest pageRequest = PageRequest.of(getItem.getFrom(), getItem.getSize());
+        RequestItem requestItem = RequestItem.of(1L, 0, 10, "text");
+        PageRequest pageRequest = PageRequest.of(requestItem.getFrom(), requestItem.getSize());
         List<ItemDto> items = List.of();
 
         when(itemRepository.findAllByAvailableAndDescriptionContainingIgnoreCaseOrNameContainingIgnoreCase(true,
-                getItem.getText(), getItem.getText(), pageRequest)).thenReturn(List.of());
+                requestItem.getText(), requestItem.getText(), pageRequest)).thenReturn(List.of());
 
-        List<ItemDto> foundItems = service.searchItem(getItem);
+        List<ItemDto> foundItems = service.searchItem(requestItem);
 
         assertEquals(items, foundItems);
         assertEquals(0, foundItems.size());
@@ -459,10 +459,10 @@ public class ItemServiceImplTest {
 
     @Test
     public void searchItemWhenRequestTextIsBlankReturnEmptyList() {
-        GetItem getItem = GetItem.of(1L, 0, 10, "");
+        RequestItem requestItem = RequestItem.of(1L, 0, 10, "");
         List<ItemDto> items = List.of();
 
-        List<ItemDto> foundItems = service.searchItem(getItem);
+        List<ItemDto> foundItems = service.searchItem(requestItem);
 
         assertEquals(items, foundItems);
         assertEquals(0, foundItems.size());
