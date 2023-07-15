@@ -47,7 +47,7 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingCreateException(userId, item.getItemId());
         }
 
-        if (item.getAvailable()) {
+        if (!item.getAvailable()) {
             throw new ItemNotAvailableException(item.getItemId());
         }
 
@@ -104,7 +104,7 @@ public class BookingServiceImpl implements BookingService {
 
         if (approved && Status.APPROVED.equals(booking.getStatus())) {
             throw new BookingAlreadyApprovedException(bookingId);
-        } else if (approved.equals(false)) {
+        } else if (!approved) {
             booking.setStatus(Status.REJECTED);
         } else {
             booking.setStatus(Status.APPROVED);
