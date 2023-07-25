@@ -3,6 +3,9 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+checkstyle.xml
+file
+localhost
 
 ### STS ###
 .apt_generated
@@ -38,5 +41,4 @@ mvnw.cmd
 mvnw
 
 ### Database ###
-db/
-.db*
+server/db
