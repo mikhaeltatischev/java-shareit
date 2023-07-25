@@ -470,15 +470,4 @@ public class BookingControllerIntegrationTest {
                         .queryParam("state", "Unknown"))
                 .andExpect(status().isBadRequest());
     }
-
-    @Test
-    @SneakyThrows
-    public void getBookingForOwnerWhenSizeIsNegativeReturnStatusIsBadRequest() {
-        mvc.perform(get(URL + "/owner")
-                        .header("X-Sharer-User-Id", itemOwnerId)
-                        .queryParam("from", "0")
-                        .queryParam("size", "-10")
-                        .queryParam("state", "ALL"))
-                .andExpect(status().isBadRequest());
-    }
 }

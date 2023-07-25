@@ -8,7 +8,6 @@ import ru.practicum.shareit.booking.dto.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repostitory.BookingRepository;
-import ru.practicum.shareit.common.FieldIsNotValidException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentDtoMapper;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
@@ -191,11 +190,7 @@ public class ItemServiceImpl implements ItemService {
 
     private Item update(Item item, ItemDto itemDto) {
         if (itemDto.getName() != null) {
-            if (!itemDto.getName().isBlank()) {
-                item.setName(itemDto.getName());
-            } else {
-                throw new FieldIsNotValidException("Name");
-            }
+            item.setName(itemDto.getName());
         }
 
         if (itemDto.getDescription() != null) {
@@ -204,14 +199,6 @@ public class ItemServiceImpl implements ItemService {
 
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
-        }
-
-        if (itemDto.getRequestId() != null) {
-            if (itemDto.getRequestId() > 0) {
-                item.setRequestId(itemDto.getRequestId());
-            } else {
-                throw new FieldIsNotValidException("RequestId");
-            }
         }
 
         return item;

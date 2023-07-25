@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.common.FieldIsNotValidException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
@@ -40,6 +41,7 @@ public class ItemController {
     public ResponseEntity<Object> updateItem(@PathVariable("itemId") Long itemId,
                                              @RequestBody ItemDto item,
                                              @RequestHeader("X-Sharer-User-Id") Long userId) {
+        checkValidItemForUpdate(item);
         log.info("Update item {}, userId = {}", itemId, userId);
         return client.update(userId, item, itemId);
     }
@@ -73,5 +75,13 @@ public class ItemController {
                                              @PathVariable("itemId") Long itemId) {
         log.info("Create comment {}, userId = {}, for item {}", comment, userId, itemId);
         return client.addComment(userId, itemId, comment);
+    }
+
+    private void checkValidItemForUpdate(ItemDto item) {
+        if (item.getName() != null) {
+            if (item.getName().isBlank()) {
+                throw new FieldIsNotValidException("Name");
+            }
+        }
     }
 }

@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repostitory.BookingRepository;
-import ru.practicum.shareit.common.FieldIsNotValidException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -243,24 +242,6 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    public void updateItemWhenSetNewNameAndDescriptionAndRequestIdAndAvailableReturnUpdatedItem() {
-        ItemDto newItem = new ItemDto(1L, "updated", userDto, "new description", true, 1L);
-
-        when(itemRepository.findById(itemId)).thenReturn(Optional.of(toItem(itemBooking, toUser(userDto))));
-        when(userRepository.findById(userId)).thenReturn(Optional.of(toUser(userDto)));
-
-        ItemDto updatedItem = service.updateItem(newItem, userId, itemId);
-
-        assertEquals(newItem, updatedItem);
-        assertEquals(newItem.getName(), updatedItem.getName());
-        assertEquals(newItem.getDescription(), updatedItem.getDescription());
-        assertEquals(newItem.getUser(), updatedItem.getUser());
-        assertEquals(newItem.getAvailable(), updatedItem.getAvailable());
-        assertEquals(newItem.getRequestId(), updatedItem.getRequestId());
-        verify(itemRepository).save(toItem(newItem, toUser(userDto)));
-    }
-
-    @Test
     public void updateItemWhenSetNewNameReturnUpdatedItem() {
         ItemDto newItem = new ItemDto();
         newItem.setName("name");
@@ -303,30 +284,6 @@ public class ItemServiceImplTest {
         assertEquals(newItem, updatedItem);
         assertEquals(newItem.getAvailable(), updatedItem.getAvailable());
         verify(itemRepository).save(toItem(newItem, toUser(userDto)));
-    }
-
-    @Test
-    public void updateItemWhenSetNewBlankNameReturnItemWithOldName() {
-        ItemDto newItem = new ItemDto();
-        newItem.setName(" ");
-
-        when(itemRepository.findById(itemId)).thenReturn(Optional.of(toItem(itemBooking, toUser(userDto))));
-        when(userRepository.findById(userId)).thenReturn(Optional.of(toUser(userDto)));
-
-        assertThrows(FieldIsNotValidException.class, () -> service.updateItem(newItem, userId, itemId));
-        verify(itemRepository, never()).save(toItem(newItem, toUser(userDto)));
-    }
-
-    @Test
-    public void updateItemWhenSetNewBadRequestIdReturnItemWithOldName() {
-        ItemDto newItem = new ItemDto();
-        newItem.setRequestId(-1L);
-
-        when(itemRepository.findById(itemId)).thenReturn(Optional.of(toItem(itemBooking, toUser(userDto))));
-        when(userRepository.findById(userId)).thenReturn(Optional.of(toUser(userDto)));
-
-        assertThrows(FieldIsNotValidException.class, () -> service.updateItem(newItem, userId, itemId));
-        verify(itemRepository, never()).save(toItem(newItem, toUser(userDto)));
     }
 
     @Test

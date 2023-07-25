@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.common.FieldIsNotValidException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.Valid;
@@ -41,6 +42,7 @@ public class UserController {
     @PatchMapping("/{userId}")
     public ResponseEntity<Object> updateUser(@RequestBody UserDto user,
                                              @Positive @PathVariable("userId") Long userId) {
+        checkValidUserForUpdate(user);
         log.info("Update user {}, userId = {}", user, userId);
         return client.update(userId, user);
     }
@@ -49,6 +51,20 @@ public class UserController {
     public ResponseEntity<Object> deleteUser(@Positive @PathVariable("userId") Long userId) {
         log.info("Delete user {}", userId);
         return client.delete(userId);
+    }
+
+    private void checkValidUserForUpdate(UserDto user) {
+        if (user.getEmail() != null) {
+            if (user.getEmail().isBlank() || !user.getEmail().matches(".+[@].+[\\.].+")) {
+                throw new FieldIsNotValidException("Email");
+            }
+        }
+
+        if (user.getName() != null) {
+            if (user.getName().isBlank()) {
+                throw new FieldIsNotValidException("Name");
+            }
+        }
     }
 }
 

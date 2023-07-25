@@ -11,7 +11,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.RequestBooking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repostitory.BookingRepository;
-import ru.practicum.shareit.common.FieldIsNotValidException;
 import ru.practicum.shareit.item.exception.ItemNotAvailableException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.common.NotOwnerException;
@@ -120,7 +119,6 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getBookingForCurrentUser(RequestBooking requestBooking) {
         Long userId = requestBooking.getUserId();
         String state = requestBooking.getState().toUpperCase();
-        checkValidGetBooking(requestBooking);
         PageRequest pageRequest = PageRequest.of(requestBooking.getFrom() / requestBooking.getSize(), requestBooking.getSize());
         LocalDateTime time = LocalDateTime.now();
         List<Booking> bookings;
@@ -156,7 +154,6 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getBookingForOwner(RequestBooking requestBooking) {
         Long userId = requestBooking.getUserId();
         String state = requestBooking.getState().toUpperCase();
-        checkValidGetBooking(requestBooking);
         PageRequest pageRequest = PageRequest.of(requestBooking.getFrom() / requestBooking.getSize(), requestBooking.getSize());
         LocalDateTime time = LocalDateTime.now();
         List<Booking> bookings;
@@ -186,14 +183,5 @@ public class BookingServiceImpl implements BookingService {
                 throw new NotValidStateException("Unknown state: " + state);
         }
         return toDto(bookings);
-    }
-
-    private void checkValidGetBooking(RequestBooking requestBooking) {
-        if (requestBooking.getFrom() < 0) {
-            throw new FieldIsNotValidException("From");
-        }
-        if (requestBooking.getSize() < 0) {
-            throw new FieldIsNotValidException("Size");
-        }
     }
 }

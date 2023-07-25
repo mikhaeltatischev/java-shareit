@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.booking.exception.*;
-import ru.practicum.shareit.common.FieldIsNotValidException;
 import ru.practicum.shareit.common.NotOwnerException;
 import ru.practicum.shareit.item.exception.*;
 import ru.practicum.shareit.request.exception.ItemRequestNotFoundException;
@@ -84,12 +83,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public AppError handleCommentCreateException(final CommentCreateException e) {
-        return new AppError(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public AppError handleIsNotValidFieldException(final FieldIsNotValidException e) {
         return new AppError(e.getMessage());
     }
 

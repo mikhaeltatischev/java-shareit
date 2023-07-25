@@ -188,22 +188,6 @@ public class ItemControllerIntegrationTest {
 
     @Test
     @SneakyThrows
-    public void updateItemWhenNameChangedAndNameIsBlankReturnStatusBadRequest() {
-        ItemDto updateItem = ItemDto.builder()
-                .name("")
-                .build();
-
-        mvc.perform(patch(URL + "/{itemId}", itemId)
-                        .header("X-Sharer-User-id", userId)
-                        .content(mapper.writeValueAsString(updateItem))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @SneakyThrows
     public void updateItemWhenDescriptionChangedReturnUpdatedItem() {
         ItemDto updateItem = ItemDto.builder()
                 .description("Простая отвертка")

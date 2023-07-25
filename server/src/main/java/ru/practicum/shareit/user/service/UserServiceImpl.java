@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.common.FieldIsNotValidException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -78,19 +77,11 @@ public class UserServiceImpl implements UserService {
 
     private User update(User user, UserDto userDto) {
         if (userDto.getEmail() != null) {
-            if (userDto.getEmail().isBlank() || !userDto.getEmail().matches(".+[@].+[\\.].+")) {
-                throw new FieldIsNotValidException("Email");
-            } else {
-                user.setEmail(userDto.getEmail());
-            }
+            user.setEmail(userDto.getEmail());
         }
 
         if (userDto.getName() != null) {
-            if (userDto.getName().isBlank()) {
-                throw new FieldIsNotValidException("Name");
-            } else {
-                user.setName(userDto.getName());
-            }
+            user.setName(userDto.getName());
         }
 
         return user;
