@@ -19,6 +19,7 @@
   <img alt="Docker" src="https://img.shields.io/badge/-Docker-46a2f1?style=flat-square&logo=docker&logoColor=white" />
 </p>
 
-## Запуск приложения
-Для развертывания проекта используется Docker-compose, в терминале нужно открыть директорию проекта и ввести команду ```docker-compose up```.  
-Используемая версия языка Java - 11.  
+## Запуск приложения  
+- Выполнить команду ```mvn clean install```
+- Далее команда ```docker-compose up```
+- Используемая версия языка Java - 11
